@@ -16,17 +16,13 @@ jobs:
           fetch-depth: 0
 
       - name: Capture changed file diff
-        id: diff
         run: |
-          echo "DIFF<<EOF" >> $GITHUB_ENV
-          git diff ${{ github.event.before }} ${{ github.sha }} -- test.json >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          git diff ${{ github.event.before }} ${{ github.sha }} -- test.json > diff.txt
 
       - name: Capture GitHub event payload
         run: |
-          echo "EVENT_JSON<<EOF" >> $GITHUB_ENV
-          cat "$GITHUB_EVENT_PATH" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          cat "$GITHUB_EVENT_PATH" > event.json
+
 
       - name: Send email notification
         uses: dawidd6/action-send-mail@v3
@@ -61,9 +57,9 @@ jobs:
             ======================
             FILE DIFF
             ======================
-            ${DIFF}
+            $(cat diff.txt)
 
             ======================
             RAW GITHUB EVENT PAYLOAD
             ======================
-            ${EVENT_JSON}
+            $(cat event.json)
