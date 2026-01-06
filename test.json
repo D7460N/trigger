@@ -1,7 +1,7 @@
 {
   "id": "test-json",
   "purpose": "Trigger GitHub Action on change",
-  "version": 1,
+  "version": 3,
   "lastUpdated": "2026-01-06T00:00:00Z",
   "data": {
     "message": "Initial value, this is a change to test trigger."
