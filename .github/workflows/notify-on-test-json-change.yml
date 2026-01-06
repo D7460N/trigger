@@ -1,0 +1,69 @@
+name: Notify on test.json change
+
+on:
+  push:
+    paths:
+      - 'test.json'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Capture changed file diff
+        id: diff
+        run: |
+          echo "DIFF<<EOF" >> $GITHUB_ENV
+          git diff ${{ github.event.before }} ${{ github.sha }} -- test.json >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Capture GitHub event payload
+        run: |
+          echo "EVENT_JSON<<EOF" >> $GITHUB_ENV
+          cat "$GITHUB_EVENT_PATH" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "GitHub Trigger: test.json changed in ${{ github.repository }}"
+          to: dragon@dragontheory.com
+          from: GitHub Trigger <${{ secrets.SMTP_FROM }}>
+          content_type: text/plain
+          body: |
+            A change was detected in test.json.
+
+            ======================
+            REPOSITORY METADATA
+            ======================
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit SHA: ${{ github.sha }}
+            Previous SHA: ${{ github.event.before }}
+            Actor: ${{ github.actor }}
+            Event: ${{ github.event_name }}
+            Timestamp: ${{ github.event.head_commit.timestamp }}
+
+            ======================
+            COMMIT MESSAGE
+            ======================
+            ${{ github.event.head_commit.message }}
+
+            ======================
+            FILE DIFF
+            ======================
+            ${DIFF}
+
+            ======================
+            RAW GITHUB EVENT PAYLOAD
+            ======================
+            ${EVENT_JSON}
