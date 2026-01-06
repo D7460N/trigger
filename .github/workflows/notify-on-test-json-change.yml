@@ -23,7 +23,6 @@ jobs:
         run: |
           cat "$GITHUB_EVENT_PATH" > event.json
 
-
       - name: Send email notification
         uses: dawidd6/action-send-mail@v3
         with:
@@ -34,7 +33,6 @@ jobs:
           subject: "GitHub Trigger: test.json changed in ${{ github.repository }}"
           to: dragon@dragontheory.com
           from: GitHub Trigger <${{ secrets.SMTP_FROM }}>
-          content_type: text/plain
           body: |
             A change was detected in test.json.
 
